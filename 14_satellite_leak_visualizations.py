@@ -1,6 +1,12 @@
 import sys
 import os
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 # Add parent directory to path to import plot_style
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from plot_style import set_tufte_defaults, apply_tufte_style, save_tufte_figure, COLORS
@@ -60,7 +66,7 @@ def create_main_methane_detection_plot():
     """
     Create time series plot showing methane anomaly detection.
     """
-    print("Generating main methane detection visualization...")
+    logger.info("Generating main methane detection visualization...")
     
     dates, methane = generate_methane_time_series()
     
@@ -121,14 +127,14 @@ def create_main_methane_detection_plot():
                 dpi=300, bbox_inches='tight')
     plt.close()
     
-    print(f"✓ Main methane detection visualization saved")
-    print(f"  Anomalies detected: {len(anomaly_dates)}")
+    logger.info(f"✓ Main methane detection visualization saved")
+    logger.info(f"  Anomalies detected: {len(anomaly_dates)}")
 
 def create_multi_sensor_fusion_plot():
     """
     Create plot showing multi-sensor fusion (TROPOMI + Sentinel-2 + Sentinel-1).
     """
-    print("Generating multi-sensor fusion visualization...")
+    logger.info("Generating multi-sensor fusion visualization...")
     
     # Generate synthetic data for a spatial grid
     np.random.seed(42)
@@ -234,27 +240,27 @@ def create_multi_sensor_fusion_plot():
                 dpi=300, bbox_inches='tight')
     plt.close()
     
-    print("✓ Multi-sensor fusion visualization saved")
+    logger.info("✓ Multi-sensor fusion visualization saved")
 
 def main():
     """Generate all visualizations for Blog 14."""
     set_tufte_defaults()
-    print("="*70)
-    print("Blog 14: Satellite Leak Detection - Visualizations")
-    print("="*70)
-    print()
+    logger.info("="*70)
+    logger.info("Blog 14: Satellite Leak Detection - Visualizations")
+    logger.info("="*70)
+    logger.info()
     
     create_main_methane_detection_plot()
     create_multi_sensor_fusion_plot()
     
-    print()
-    print("="*70)
-    print("All visualizations generated successfully!")
-    print("="*70)
-    print()
-    print("Files created:")
-    print("  - 14_satellite_leak_detection_main.png")
-    print("  - 14_satellite_multi_sensor_fusion.png")
+    logger.info()
+    logger.info("="*70)
+    logger.info("All visualizations generated successfully!")
+    logger.info("="*70)
+    logger.info()
+    logger.info("Files created:")
+    logger.info("  - 14_satellite_leak_detection_main.png")
+    logger.info("  - 14_satellite_multi_sensor_fusion.png")
 
 if __name__ == "__main__":
     main()
