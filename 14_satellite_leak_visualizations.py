@@ -62,7 +62,7 @@ def generate_methane_time_series():
     
     return dates, baseline
 
-def create_main_methane_detection_plot():
+def create_main_methane_detection_plot(plot: bool = False):
     """
     Create time series plot showing methane anomaly detection.
     """
@@ -80,57 +80,58 @@ def create_main_methane_detection_plot():
     anomalies = methane > threshold
     
     # Create figure
-    fig, ax = plt.subplots(figsize=(12, 6))
+    if plot:
+        fig, ax = plt.subplots(figsize=(12, 6))
     
     # Plot baseline
-    ax.plot(dates, methane, 'o-', color='black', linewidth=1, 
-           markersize=3, markerfacecolor='white', markeredgecolor='black',
-           label='TROPOMI CH₄ Observations', zorder=3)
+        ax.plot(dates, methane, 'o-', color='black', linewidth=1, 
+               markersize=3, markerfacecolor='white', markeredgecolor='black',
+               label='TROPOMI CH₄ Observations', zorder=3)
     
     # Plot rolling mean
-    ax.plot(dates, rolling_mean, '--', color='black', linewidth=2,
-           label='14-Day Rolling Mean', zorder=2)
+        ax.plot(dates, rolling_mean, '--', color='black', linewidth=2,
+               label='14-Day Rolling Mean', zorder=2)
     
     # Plot threshold
-    ax.plot(dates, threshold, ':', color='black', linewidth=2,
-           label='Anomaly Threshold (μ + 3σ)', zorder=2)
+        ax.plot(dates, threshold, ':', color='black', linewidth=2,
+               label='Anomaly Threshold (μ + 3σ)', zorder=2)
     
     # Highlight anomalies
-    anomaly_dates = [d for d, a in zip(dates, anomalies) if a]
-    anomaly_values = [v for v, a in zip(methane, anomalies) if a]
+        anomaly_dates = [d for d, a in zip(dates, anomalies) if a]
+        anomaly_values = [v for v, a in zip(methane, anomalies) if a]
     
-    ax.scatter(anomaly_dates, anomaly_values, s=150, 
-              facecolors='none', edgecolors='#FF4136', linewidths=3,
-              label=f'Detected Anomalies (n={len(anomaly_dates)})', zorder=4)
+        ax.scatter(anomaly_dates, anomaly_values, s=150, 
+                  facecolors='none', edgecolors='#FF4136', linewidths=3,
+                  label=f'Detected Anomalies (n={len(anomaly_dates)})', zorder=4)
     
     # Apply minimalist style
-    apply_minimalist_style_manual(ax)
+        apply_minimalist_style_manual(ax)
     
-    ax.set_xlabel('Date', fontsize=11)
-    ax.set_ylabel('CH₄ Column Density (ppb)', fontsize=11)
-    ax.set_title('Pipeline Leak Detection from TROPOMI Methane Data', 
-                 fontsize=13, fontweight='bold', loc='left', pad=20)
+        ax.set_xlabel('Date', fontsize=11)
+        ax.set_ylabel('CH₄ Column Density (ppb)', fontsize=11)
+        ax.set_title('Pipeline Leak Detection from TROPOMI Methane Data', 
+                     fontsize=13, fontweight='bold', loc='left', pad=20)
     
-    ax.legend(loc='upper left', frameon=False, fontsize=9)
+        ax.legend(loc='upper left', frameon=False, fontsize=9)
     
     # Format x-axis
-    ax.tick_params(axis='x', rotation=45)
+        ax.tick_params(axis='x', rotation=45)
     
     # Add annotation for leak events
-    ax.annotate('Potential Leak Event', 
-               xy=(dates[26], methane[26]), xytext=(dates[40], methane[26] + 200),
-               arrowprops=dict(arrowstyle='->', color='black', lw=1.5),
-               fontsize=9, bbox=dict(boxstyle='round', facecolor='white', edgecolor='black'))
+        ax.annotate('Potential Leak Event', 
+                   xy=(dates[26], methane[26]), xytext=(dates[40], methane[26] + 200),
+                   arrowprops=dict(arrowstyle='->', color='black', lw=1.5),
+                   fontsize=9, bbox=dict(boxstyle='round', facecolor='white', edgecolor='black'))
     
-    plt.tight_layout()
-    plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/14_satellite_leak_detection_main.png', 
-                dpi=300, bbox_inches='tight')
-    plt.close()
+        plt.tight_layout()
+        plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/14_satellite_leak_detection_main.png', 
+                    dpi=300, bbox_inches='tight')
+        plt.close()
     
     logger.info(f"✓ Main methane detection visualization saved")
     logger.info(f"  Anomalies detected: {len(anomaly_dates)}")
 
-def create_multi_sensor_fusion_plot():
+def create_multi_sensor_fusion_plot(plot: bool = False):
     """
     Create plot showing multi-sensor fusion (TROPOMI + Sentinel-2 + Sentinel-1).
     """
@@ -163,82 +164,83 @@ def create_multi_sensor_fusion_plot():
     sentinel1 = np.clip(sentinel1, -0.4, 0.1)
     
     # Create figure with 4 subplots
-    fig = plt.figure(figsize=(14, 10))
+    if plot:
+        fig = plt.figure(figsize=(14, 10))
     
     # TROPOMI
-    ax1 = plt.subplot(2, 2, 1)
-    im1 = ax1.contourf(X, Y, tropomi, levels=15, cmap='YlOrRd')
-    ax1.plot(leak_x, leak_y, 'k*', markersize=20, label='Pipeline Location')
-    apply_minimalist_style_manual(ax1)
-    ax1.set_xlabel('Easting (km)', fontsize=9)
-    ax1.set_ylabel('Northing (km)', fontsize=9)
-    ax1.set_title('TROPOMI Methane\n(5.5 km resolution)', 
-                  fontsize=11, fontweight='bold', loc='center', pad=10)
-    ax1.legend(loc='upper right', frameon=False, fontsize=8)
-    cbar1 = plt.colorbar(im1, ax=ax1)
-    cbar1.set_label('ΔCH₄ (ppb)', fontsize=9)
-    cbar1.outline.set_visible(False)
+        ax1 = plt.subplot(2, 2, 1)
+        im1 = ax1.contourf(X, Y, tropomi, levels=15, cmap='YlOrRd')
+        ax1.plot(leak_x, leak_y, 'k*', markersize=20, label='Pipeline Location')
+        apply_minimalist_style_manual(ax1)
+        ax1.set_xlabel('Easting (km)', fontsize=9)
+        ax1.set_ylabel('Northing (km)', fontsize=9)
+        ax1.set_title('TROPOMI Methane\n(5.5 km resolution)', 
+                      fontsize=11, fontweight='bold', loc='center', pad=10)
+        ax1.legend(loc='upper right', frameon=False, fontsize=8)
+        cbar1 = plt.colorbar(im1, ax=ax1)
+        cbar1.set_label('ΔCH₄ (ppb)', fontsize=9)
+        cbar1.outline.set_visible(False)
     
     # Sentinel-2
-    ax2 = plt.subplot(2, 2, 2)
-    im2 = ax2.contourf(X, Y, sentinel2, levels=15, cmap='RdYlGn')
-    ax2.plot(leak_x, leak_y, 'k*', markersize=20, label='Pipeline Location')
-    apply_minimalist_style_manual(ax2)
-    ax2.set_xlabel('Easting (km)', fontsize=9)
-    ax2.set_ylabel('Northing (km)', fontsize=9)
-    ax2.set_title('Sentinel-2 NDVI Change\n(10 m resolution)', 
-                  fontsize=11, fontweight='bold', loc='center', pad=10)
-    ax2.legend(loc='upper right', frameon=False, fontsize=8)
-    cbar2 = plt.colorbar(im2, ax=ax2)
-    cbar2.set_label('ΔNDVI', fontsize=9)
-    cbar2.outline.set_visible(False)
+        ax2 = plt.subplot(2, 2, 2)
+        im2 = ax2.contourf(X, Y, sentinel2, levels=15, cmap='RdYlGn')
+        ax2.plot(leak_x, leak_y, 'k*', markersize=20, label='Pipeline Location')
+        apply_minimalist_style_manual(ax2)
+        ax2.set_xlabel('Easting (km)', fontsize=9)
+        ax2.set_ylabel('Northing (km)', fontsize=9)
+        ax2.set_title('Sentinel-2 NDVI Change\n(10 m resolution)', 
+                      fontsize=11, fontweight='bold', loc='center', pad=10)
+        ax2.legend(loc='upper right', frameon=False, fontsize=8)
+        cbar2 = plt.colorbar(im2, ax=ax2)
+        cbar2.set_label('ΔNDVI', fontsize=9)
+        cbar2.outline.set_visible(False)
     
     # Sentinel-1
-    ax3 = plt.subplot(2, 2, 3)
-    im3 = ax3.contourf(X, Y, sentinel1, levels=15, cmap='RdYlGn')
-    ax3.plot(leak_x, leak_y, 'k*', markersize=20, label='Pipeline Location')
-    apply_minimalist_style_manual(ax3)
-    ax3.set_xlabel('Easting (km)', fontsize=9)
-    ax3.set_ylabel('Northing (km)', fontsize=9)
-    ax3.set_title('Sentinel-1 Coherence Change\n(10 m resolution)', 
-                  fontsize=11, fontweight='bold', loc='center', pad=10)
-    ax3.legend(loc='upper right', frameon=False, fontsize=8)
-    cbar3 = plt.colorbar(im3, ax=ax3)
-    cbar3.set_label('Δ Coherence', fontsize=9)
-    cbar3.outline.set_visible(False)
+        ax3 = plt.subplot(2, 2, 3)
+        im3 = ax3.contourf(X, Y, sentinel1, levels=15, cmap='RdYlGn')
+        ax3.plot(leak_x, leak_y, 'k*', markersize=20, label='Pipeline Location')
+        apply_minimalist_style_manual(ax3)
+        ax3.set_xlabel('Easting (km)', fontsize=9)
+        ax3.set_ylabel('Northing (km)', fontsize=9)
+        ax3.set_title('Sentinel-1 Coherence Change\n(10 m resolution)', 
+                      fontsize=11, fontweight='bold', loc='center', pad=10)
+        ax3.legend(loc='upper right', frameon=False, fontsize=8)
+        cbar3 = plt.colorbar(im3, ax=ax3)
+        cbar3.set_label('Δ Coherence', fontsize=9)
+        cbar3.outline.set_visible(False)
     
     # Fused detection score
-    ax4 = plt.subplot(2, 2, 4)
+        ax4 = plt.subplot(2, 2, 4)
     # Normalize and combine
-    tropomi_norm = (tropomi - tropomi.min()) / (tropomi.max() - tropomi.min())
-    sentinel2_norm = np.abs(sentinel2) / np.abs(sentinel2).max()
-    sentinel1_norm = np.abs(sentinel1) / np.abs(sentinel1).max()
+        tropomi_norm = (tropomi - tropomi.min()) / (tropomi.max() - tropomi.min())
+        sentinel2_norm = np.abs(sentinel2) / np.abs(sentinel2).max()
+        sentinel1_norm = np.abs(sentinel1) / np.abs(sentinel1).max()
     
-    fused_score = (tropomi_norm * 0.5 + sentinel2_norm * 0.25 + sentinel1_norm * 0.25) * 100
+        fused_score = (tropomi_norm * 0.5 + sentinel2_norm * 0.25 + sentinel1_norm * 0.25) * 100
     
-    im4 = ax4.contourf(X, Y, fused_score, levels=15, cmap='hot_r')
-    ax4.plot(leak_x, leak_y, 'k*', markersize=20, label='Pipeline Location')
+        im4 = ax4.contourf(X, Y, fused_score, levels=15, cmap='hot_r')
+        ax4.plot(leak_x, leak_y, 'k*', markersize=20, label='Pipeline Location')
     
     # Add contour for high confidence detection
-    ax4.contour(X, Y, fused_score, levels=[60], colors='cyan', linewidths=3, linestyles='--')
+        ax4.contour(X, Y, fused_score, levels=[60], colors='cyan', linewidths=3, linestyles='--')
     
-    apply_minimalist_style_manual(ax4)
-    ax4.set_xlabel('Easting (km)', fontsize=9)
-    ax4.set_ylabel('Northing (km)', fontsize=9)
-    ax4.set_title('Fused Detection Score\n(Multi-Sensor Integration)', 
-                  fontsize=11, fontweight='bold', loc='center', pad=10)
-    ax4.legend(loc='upper right', frameon=False, fontsize=8)
-    cbar4 = plt.colorbar(im4, ax=ax4)
-    cbar4.set_label('Leak Confidence (%)', fontsize=9)
-    cbar4.outline.set_visible(False)
+        apply_minimalist_style_manual(ax4)
+        ax4.set_xlabel('Easting (km)', fontsize=9)
+        ax4.set_ylabel('Northing (km)', fontsize=9)
+        ax4.set_title('Fused Detection Score\n(Multi-Sensor Integration)', 
+                      fontsize=11, fontweight='bold', loc='center', pad=10)
+        ax4.legend(loc='upper right', frameon=False, fontsize=8)
+        cbar4 = plt.colorbar(im4, ax=ax4)
+        cbar4.set_label('Leak Confidence (%)', fontsize=9)
+        cbar4.outline.set_visible(False)
     
-    plt.suptitle('Multi-Sensor Fusion for Pipeline Leak Detection', 
-                fontsize=14, fontweight='bold', y=0.98)
+        plt.suptitle('Multi-Sensor Fusion for Pipeline Leak Detection', 
+                    fontsize=14, fontweight='bold', y=0.98)
     
-    plt.tight_layout(rect=[0, 0, 1, 0.97])
-    plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/14_satellite_multi_sensor_fusion.png', 
-                dpi=300, bbox_inches='tight')
-    plt.close()
+        plt.tight_layout(rect=[0, 0, 1, 0.97])
+        plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/14_satellite_multi_sensor_fusion.png', 
+                    dpi=300, bbox_inches='tight')
+        plt.close()
     
     logger.info("✓ Multi-sensor fusion visualization saved")
 
