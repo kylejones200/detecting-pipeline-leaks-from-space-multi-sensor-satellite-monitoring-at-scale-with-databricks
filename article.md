@@ -1,81 +1,45 @@
+---
+author: "Kyle Jones"
+date_published: "October 24, 2025"
+date_exported_from_medium: "November 10, 2025"
+canonical_link: "https://medium.com/@kyle-t-jones/detecting-pipeline-leaks-from-space-multi-sensor-satellite-monitoring-at-scale-with-databricks-6d28bc1e4eea"
+---
+
 # Detecting Pipeline Leaks from Space: Multi-Sensor Satellite Monitoring at Scale with Databricks When the Nord Stream pipeline ruptured in September 2022, satellite data
 detected the leak before official confirmation. TROPOMI measured...
 
 ### Detecting Pipeline Leaks from Space: Multi-Sensor Satellite Monitoring at Scale with Databricks
-When the Nord Stream pipeline ruptured in September 2022, satellite data
-detected the leak before official confirmation. TROPOMI measured methane
-plumes reaching 40 km downstream. Sentinel-2 captured surface
-disturbances in the Baltic Sea. Sentinel-1 SAR showed coherence loss in
-the water column. The satellites saw what happened hours before
-inspection crews could reach the remote location.
+When the Nord Stream pipeline ruptured in September 2022, satellite data detected the leak before official confirmation. TROPOMI measured methane plumes reaching 40 km downstream. Sentinel-2 captured surface disturbances in the Baltic Sea. Sentinel-1 SAR showed coherence loss in the water column. The satellites saw what happened hours before inspection crews could reach the remote location.
 
-Pipeline operators spend billions on inline inspection and aerial
-surveys, but 95% of the infrastructure goes unmonitored on any given
-day. A 100,000 km midstream network would require 274 helicopters flying
-every day to achieve weekly coverage. Satellites image the entire system
-daily, regardless of terrain, weather, or access restrictions.
+Pipeline operators spend billions on inline inspection and aerial surveys, but 95% of the infrastructure goes unmonitored on any given day. A 100,000 km midstream network would require 274 helicopters flying every day to achieve weekly coverage. Satellites image the entire system daily, regardless of terrain, weather, or access restrictions.
 
-Modern satellite systems detect leaks through multiple physical signals:
-methane absorption in atmospheric columns (TROPOMI), vegetation stress
-from hydrocarbon exposure (Sentinel-2 multispectral), and ground
-deformation or surface changes (Sentinel-1 SAR). The challenge isn't
-data availability --- it's building a scalable pipeline that ingests
-terabytes of satellite imagery, extracts leak signatures near the
-right-of-way, scores tiles by anomaly, and presents prioritized
-inspection targets to field crews.
+Modern satellite systems detect leaks through multiple physical signals: methane absorption in atmospheric columns (TROPOMI), vegetation stress from hydrocarbon exposure (Sentinel-2 multispectral), and ground deformation or surface changes (Sentinel-1 SAR). The challenge isn't data availability --- it's building a scalable pipeline that ingests terabytes of satellite imagery, extracts leak signatures near the right-of-way, scores tiles by anomaly, and presents prioritized inspection targets to field crews.
 
-This is a Databricks + PySpark + Sedona + Mosaic implementation. The
-architecture follows medallion structure (Bronze/Silver/Gold), scales to
-continental pipeline networks, and delivers daily leak scores with
-explainable anomaly detection --- no black-box neural networks, no
-Prophet time series nonsense.
+This is a Databricks + PySpark + Sedona + Mosaic implementation. The architecture follows medallion structure (Bronze/Silver/Gold), scales to continental pipeline networks, and delivers daily leak scores with explainable anomaly detection --- no black-box neural networks, no Prophet time series nonsense.
 
 
-<figcaption><em>Leak score heatmap across a 500-meter pipeline buffer
-derived from TROPOMI methane enhancement (50% weight), Sentinel-2 NDVI
-decline (30% weight), and Sentinel-1 coherence loss (20% weight). The
-composite anomaly score identifies tiles with concurrent multi-sensor
-signatures characteristic of product release. High-score tiles (&gt;3σ)
-trigger field inspection within 24 hours.</em></figcaption>
+<figcaption><em>Leak score heatmap across a 500-meter pipeline buffer derived from TROPOMI methane enhancement (50% weight), Sentinel-2 NDVI decline (30% weight), and Sentinel-1 coherence loss (20% weight). The composite anomaly score identifies tiles with concurrent multi-sensor signatures characteristic of product release. High-score tiles (&gt;3σ) trigger field inspection within 24 hours.</em></figcaption>
 
 
 The Problem: Continental Scale Pipeline Monitoring
 
-North America operates 3 million miles of pipelines transporting natural
-gas, crude oil, refined products, and NGLs. The Pipeline and Hazardous
-Materials Safety Administration (PHMSA) reports 300--400 significant
-incidents annually, with leak detection delays averaging 2--7 days
-between release and confirmation.
+North America operates 3 million miles of pipelines transporting natural gas, crude oil, refined products, and NGLs. The Pipeline and Hazardous Materials Safety Administration (PHMSA) reports 300--400 significant incidents annually, with leak detection delays averaging 2--7 days between release and confirmation.
 
 Traditional leak detection methods include:
 
-1.  [SCADA pressure/flow monitoring --- Effective for large ruptures
-    (\>2% flow) but misses slow leaks]
-2.  [Inline inspection (ILI) --- Finds corrosion and cracks but runs
-    every 3--5 years, missing interim failures]
-3.  [Aerial patrol --- Covers 10--20% of system monthly,
-    weather-dependent, expensive (\$500--2000/mile)]
-4.  [Fiber optic sensing --- Accurate but costs \$50K-200K/mile, limits
-    deployment to critical segments]
+1.  [SCADA pressure/flow monitoring --- Effective for large ruptures (\>2% flow) but misses slow leaks]
+2.  [Inline inspection (ILI) --- Finds corrosion and cracks but runs every 3--5 years, missing interim failures]
+3.  [Aerial patrol --- Covers 10--20% of system monthly, weather-dependent, expensive (\$500--2000/mile)]
+4.  [Fiber optic sensing --- Accurate but costs \$50K-200K/mile, limits deployment to critical segments]
 
 None of these scale to daily, network-wide monitoring. Satellites do.
 
 ### Satellite Leak Signatures
-Methane Detection (TROPOMI): The TROPOspheric Monitoring Instrument on
-Sentinel-5P measures column-averaged methane (XCH4) at 7×7 km resolution
-daily. Natural gas leaks create localized enhancements detectable as
-10--50 ppb anomalies above background (1850 ppb global mean).
+Methane Detection (TROPOMI): The TROPOspheric Monitoring Instrument on Sentinel-5P measures column-averaged methane (XCH4) at 7×7 km resolution daily. Natural gas leaks create localized enhancements detectable as 10--50 ppb anomalies above background (1850 ppb global mean).
 
-Vegetation Stress (Sentinel-2): Hydrocarbon contamination stresses
-vegetation, reducing chlorophyll and near-infrared reflectance. The
-Normalized Difference Vegetation Index (NDVI = (NIR --- Red) / (NIR +
-Red)) drops 0.1--0.3 units over leak sites within 2--4 weeks of
-exposure.
+Vegetation Stress (Sentinel-2): Hydrocarbon contamination stresses vegetation, reducing chlorophyll and near-infrared reflectance. The Normalized Difference Vegetation Index (NDVI = (NIR --- Red) / (NIR + Red)) drops 0.1--0.3 units over leak sites within 2--4 weeks of exposure.
 
-Surface Change (Sentinel-1 SAR): Synthetic Aperture Radar coherence
-measures surface stability between repeat passes. Ground subsidence,
-moisture changes, or vegetation die-off from leaks reduce coherence from
-baseline 0.7--0.9 to 0.3--0.5.
+Surface Change (Sentinel-1 SAR): Synthetic Aperture Radar coherence measures surface stability between repeat passes. Ground subsidence, moisture changes, or vegetation die-off from leaks reduce coherence from baseline 0.7--0.9 to 0.3--0.5.
 
 ### Architecture: Databricks Medallion for Geospatial
 We implement a three-tier data pipeline:
@@ -91,8 +55,7 @@ Silver (Feature Engineering):
 
 - Spatial join satellite observations to 500m ROW buffer
 - Grid buffer into 250m×250m tiles (H3 or custom tessellation)
-- Compute per-tile, per-date features: CH4 mean, NDVI,
-  coherence
+- Compute per-tile, per-date features: CH4 mean, NDVI, coherence
 
 Gold (Anomaly Scoring):
 
@@ -116,11 +79,9 @@ import mosaic as mos
 from pyspark.dbutils import DBUtils
 ```
 
-Sedona provides spatial SQL functions (ST_Buffer, ST_Intersects,
-ST_Distance) that execute in parallel across Spark workers.
+Sedona provides spatial SQL functions (ST_Buffer, ST_Intersects, ST_Distance) that execute in parallel across Spark workers.
 
-Mosaic enables geospatial visualizations and H3 hexagonal tessellation
-for consistent tile indexing.
+Mosaic enables geospatial visualizations and H3 hexagonal tessellation for consistent tile indexing.
 
 ### Implementation: Bronze to Gold
 ### Step 1: Initialize Databricks Environment
@@ -208,18 +169,14 @@ FROM row_buffer;
 
 Why 500m buffer?
 
-- TROPOMI methane disperses 2--5 km downwind but shows detectable
-  enhancement within 500m
-- Sentinel-2 NDVI stress appears within 100--300m of leak over 2--4
-  weeks
+- TROPOMI methane disperses 2--5 km downwind but shows detectable enhancement within 500m
+- Sentinel-2 NDVI stress appears within 100--300m of leak over 2--4 weeks
 - Sentinel-1 coherence loss is localized within 50--200m
 
 Why 250m tiles?
 
-- Balances Sentinel-2 resolution (10m native) with processing
-  efficiency
-- Provides \~100 Sentinel-2 pixels per tile for robust
-  statistics
+- Balances Sentinel-2 resolution (10m native) with processing efficiency
+- Provides \~100 Sentinel-2 pixels per tile for robust statistics
 - Matches typical pipeline inspection segment resolution
 
 ### Step 3: Ingest Satellite Data (Bronze)
@@ -449,12 +406,9 @@ CREATE INDEX idx_leak_score ON gold.leak_scores(leak_score DESC);
 
 Weighting Rationale:
 
-- CH4 (50%): Direct leak signature, but suffers from atmospheric
-  dispersion and wind effects
-- NDVI (30%): High specificity for hydrocarbon contamination, but lags
-  leak by 2--4 weeks
-- Coherence (20%): Sensitive to surface change but also affected by
-  precipitation, vegetation growth
+- CH4 (50%): Direct leak signature, but suffers from atmospheric dispersion and wind effects
+- NDVI (30%): High specificity for hydrocarbon contamination, but lags leak by 2--4 weeks
+- Coherence (20%): Sensitive to surface change but also affected by precipitation, vegetation growth
 
 ### Step 6: Visualization and Alerting
 ```python
@@ -584,43 +538,17 @@ Priority #2: Cell 8a2a1072c8bffff
 
 
 ### So what?
-What does this matter? What is the take away? (don't mess with Maui when
-he's on a breakaway... )
+What does this matter? What is the take away? (don't mess with Maui when he's on a breakaway... )
 
-First, multi-sensor fusion improves detection. These models do best when
-you can combine layers. CH4, NDVI, and coherence achieves 85% precision
-at 70% recall (vs 60% precision for CH4 alone)
+First, multi-sensor fusion improves detection. These models do best when you can combine layers. CH4, NDVI, and coherence achieves 85% precision at 70% recall (vs 60% precision for CH4 alone)
 
-H3 tessellation + Delta Lake sub-second queries across pipeline
-networks. Databricks handles petabyte-scale geospatial --- Sedona +
-Mosaic + Unity Catalog delivers spatial analytics without custom
-infrastructure.
+H3 tessellation + Delta Lake sub-second queries across pipeline networks. Databricks handles petabyte-scale geospatial --- Sedona + Mosaic + Unity Catalog delivers spatial analytics without custom infrastructure.
 
 ### Production Considerations
-TROPOMI, Sentinel-1, and Sentinel-2 are free (thanks Copernicus
-program!). TROPOMI: 3-hour delay (near real-time), Sentinel-2: 12--24
-hour delay (L2A processing), Sentinel-1: 24--48 hour delay
-(interferometric processing).
+TROPOMI, Sentinel-1, and Sentinel-2 are free (thanks Copernicus program!). TROPOMI: 3-hour delay (near real-time), Sentinel-2: 12--24 hour delay (L2A processing), Sentinel-1: 24--48 hour delay (interferometric processing).
 
-Pipeline leak detection from space is possible today with existing data
-and tools. When Nord Stream ruptured, satellites saw the methane plume
-before helicopters could fly. When Colonial Pipeline had a lost of
-containment (1.2M gallons) in North Carolina in 2020, Sentinel-2
-captured vegetation stress weeks before ground crews noticed.
+Pipeline leak detection from space is possible today with existing data and tools. When Nord Stream ruptured, satellites saw the methane plume before helicopters could fly. When Colonial Pipeline had a lost of containment (1.2M gallons) in North Carolina in 2020, Sentinel-2 captured vegetation stress weeks before ground crews noticed.
 
-The shift from periodic aerial inspection to daily satellite monitoring
-changes leak detection economics: \$5--20/mile for helicopter patrol vs
-\$0.02/mile for satellite coverage. A 100,000-mile midstream network
-spends \$50M-200M annually on aerial surveys covering 10--20% of the
-system. Satellite monitoring covers 100% daily for \$730K/year
-(compute + engineering).
+The shift from periodic aerial inspection to daily satellite monitoring changes leak detection economics: \$5--20/mile for helicopter patrol vs \$0.02/mile for satellite coverage. A 100,000-mile midstream network spends \$50M-200M annually on aerial surveys covering 10--20% of the system. Satellite monitoring covers 100% daily for \$730K/year (compute + engineering).
 
-This Databricks implementation scales from 1,000 km regional networks to
-500,000 km continental systems.
-::::::::By [Kyle Jones](https://medium.com/@kyle-t-jones) on
-[October 24, 2025](https://medium.com/p/6d28bc1e4eea).
-
-[Canonical
-link](https://medium.com/@kyle-t-jones/detecting-pipeline-leaks-from-space-multi-sensor-satellite-monitoring-at-scale-with-databricks-6d28bc1e4eea)
-
-Exported from [Medium](https://medium.com) on November 10, 2025.
+This Databricks implementation scales from 1,000 km regional networks to 500,000 km continental systems.
