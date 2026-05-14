@@ -38,15 +38,15 @@ The Gold layer executes anomaly scoring in four steps. Calculate per-tile baseli
 
 ### Technology Stack
 
-**Sedona** provides spatial SQL functions (ST_Buffer, ST_Intersects, ST_Distance) that execute in parallel across Spark workers.
+Sedona provides spatial SQL functions (ST_Buffer, ST_Intersects, ST_Distance) that execute in parallel across Spark workers.
 
-**Mosaic** enables geospatial visualizations and H3 hexagonal tessellation for consistent tile indexing.
+Mosaic enables geospatial visualizations and H3 hexagonal tessellation for consistent tile indexing.
 
 ## Implementation: Bronze to Gold
 
 ### Step 1: Initialize Databricks Environment
 
-**Output:**
+Output:
 ```
 Spark Session Initialized:
   Version: 3.5.0
@@ -104,7 +104,7 @@ The weighting rationale reflects each sensor's strengths and weaknesses. CH4 (50
 
 ### Step 6: Visualization and Alerting
 
-**Output (example):**
+Output (example):
 ```
 Leak Score Statistics (Last 24 Hours):
   Total tiles monitored: 8,450
@@ -157,11 +157,11 @@ The code isn't a tutorial—it's a template. Change catalog paths, adjust weight
 
 ---
 
-**Technology:** Databricks, PySpark, Sedona, Mosaic, Delta Lake, Unity Catalog  
-**Data Sources:** TROPOMI CH4, Sentinel-2 L2A, Sentinel-1 coherence  
-**Scale:** 100,000 km pipeline network, 8,450 daily tiles, <1 hour processing  
-**Performance:** 85% precision, 70% recall, 5% false positive rate (multi-sensor)  
-**Cost:** $0.02/km/day (vs $5-20/km aerial patrol)
+Technology: Databricks, PySpark, Sedona, Mosaic, Delta Lake, Unity Catalog  
+Data Sources: TROPOMI CH4, Sentinel-2 L2A, Sentinel-1 coherence  
+Scale: 100,000 km pipeline network, 8,450 daily tiles, <1 hour processing  
+Performance: 85% precision, 70% recall, 5% false positive rate (multi-sensor)  
+Cost: $0.02/km/day (vs $5-20/km aerial patrol)
 
 ### Step 4: Feature Engineering (Silver)
 
