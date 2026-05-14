@@ -247,18 +247,14 @@ def create_multi_sensor_fusion_plot(plot: bool = False):
 def main():
     """Generate all visualizations for Blog 14."""
     set_tufte_defaults()
-    logger.info("="*70)
     logger.info("Blog 14: Satellite Leak Detection - Visualizations")
-    logger.info("="*70)
     logger.info()
     
     create_main_methane_detection_plot()
     create_multi_sensor_fusion_plot()
     
     logger.info()
-    logger.info("="*70)
     logger.info("All visualizations generated successfully!")
-    logger.info("="*70)
     logger.info()
     logger.info("Files created:")
     logger.info("  - 14_satellite_leak_detection_main.png")
