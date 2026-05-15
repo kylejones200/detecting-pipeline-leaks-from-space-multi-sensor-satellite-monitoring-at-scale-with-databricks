@@ -1,6 +1,4 @@
 import signalplot
-import sys
-import os
 
 import logging
 logging.basicConfig(
@@ -20,7 +18,6 @@ from datetime import datetime, timedelta
 
 
 
-from pathlib import Path
 
 def apply_minimalist_style_manual(ax):
     """Apply minimalist style components manually to axis."""
@@ -104,15 +101,15 @@ def create_main_methane_detection_plot(plot: bool = False):
     # Add annotation for leak events
         ax.annotate('Potential Leak Event', 
                    xy=(dates[26], methane[26]), xytext=(dates[40], methane[26] + 200),
-                   arrowprops=dict(arrowstyle='->', color='black', lw=1.5),
-                   fontsize=9, bbox=dict(boxstyle='round', facecolor='white', edgecolor='black'))
+                   arrowprops={'arrowstyle': '->', 'color': 'black', 'lw': 1.5},
+                   fontsize=9, bbox={'boxstyle': 'round', 'facecolor': 'white', 'edgecolor': 'black'})
     
         plt.tight_layout()
         plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/14_satellite_leak_detection_main.png', 
                     dpi=300, bbox_inches='tight')
         plt.close()
     
-    logger.info(f"✓ Main methane detection visualization saved")
+    logger.info("✓ Main methane detection visualization saved")
     logger.info(f"  Anomalies detected: {len(anomaly_dates)}")
 
 def create_multi_sensor_fusion_plot(plot: bool = False):
@@ -149,7 +146,7 @@ def create_multi_sensor_fusion_plot(plot: bool = False):
     
     # Create figure with 4 subplots
     if plot:
-        fig = plt.figure(figsize=(14, 10))
+        plt.figure(figsize=(14, 10))
     
     # TROPOMI
         ax1 = plt.subplot(2, 2, 1)
