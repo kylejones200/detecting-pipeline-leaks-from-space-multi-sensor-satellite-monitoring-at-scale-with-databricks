@@ -153,7 +153,7 @@ def create_main_methane_detection_plot(plot: bool = False):
 
         plt.tight_layout()
         plt.savefig(
-            "/Users/k.jones/Desktop/blogs/blog_posts/14_satellite_leak_detection_main.png",
+            "outputs/14_satellite_leak_detection_main.png",
             dpi=300,
             bbox_inches="tight",
         )
@@ -306,7 +306,7 @@ def create_multi_sensor_fusion_plot(plot: bool = False):
 
         plt.tight_layout(rect=[0, 0, 1, 0.97])
         plt.savefig(
-            "/Users/k.jones/Desktop/blogs/blog_posts/14_satellite_multi_sensor_fusion.png",
+            "outputs/14_satellite_multi_sensor_fusion.png",
             dpi=300,
             bbox_inches="tight",
         )
