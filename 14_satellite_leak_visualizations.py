@@ -1,10 +1,11 @@
 import logging
+from datetime import datetime, timedelta
 
+import matplotlib.pyplot as plt
+import numpy as np
 import signalplot
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 """
@@ -12,15 +13,11 @@ Visualization generation for Blog 14: Pipeline Leak Detection from Satellite Dat
 Creates minimalist-style visualizations for multi-sensor leak detection.
 """
 
-from datetime import datetime, timedelta
 
-import matplotlib.pyplot as plt
-import numpy as np
 
 
 def apply_minimalist_style_manual(ax):
     """Apply minimalist style components manually to axis."""
-
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_position(("outward", 5))
@@ -30,15 +27,10 @@ def apply_minimalist_style_manual(ax):
 def generate_methane_time_series():
     """Generate synthetic TROPOMI methane time series with anomalies."""
     np.random.seed(42)
-
     # 90 days of data
     dates = [datetime(2024, 1, 1) + timedelta(days=i) for i in range(90)]
-
     # Baseline methane (seasonal + noise)
-    baseline = (
-        1850 + 20 * np.sin(np.arange(90) * 2 * np.pi / 365) + np.random.randn(90) * 15
-    )
-
+    baseline = 1850 + 20 * np.sin(np.arange(90) * 2 * np.pi / 365) + np.random.randn(90) * 15
     # Add leak events
     leak_indices = [25, 26, 27, 28, 58, 59, 60]
     for idx in leak_indices:
@@ -52,9 +44,7 @@ def create_main_methane_detection_plot(plot: bool = False):
     Create time series plot showing methane anomaly detection.
     """
     logger.info("Generating main methane detection visualization...")
-
     dates, methane = generate_methane_time_series()
-
     # Calculate rolling baseline and threshold
     window = 14
     rolling_mean = np.convolve(methane, np.ones(window) / window, mode="same")
@@ -64,14 +54,11 @@ def create_main_methane_detection_plot(plot: bool = False):
             for i in range(len(methane))
         ]
     )
-
     threshold = rolling_mean + 3 * rolling_std
     anomalies = methane > threshold
-
     # Create figure
     if plot:
         fig, ax = plt.subplots(figsize=(12, 6))
-
         # Plot baseline
         ax.plot(
             dates,
@@ -85,7 +72,6 @@ def create_main_methane_detection_plot(plot: bool = False):
             label="TROPOMI CH₄ Observations",
             zorder=3,
         )
-
         # Plot rolling mean
         ax.plot(
             dates,
@@ -96,7 +82,6 @@ def create_main_methane_detection_plot(plot: bool = False):
             label="14-Day Rolling Mean",
             zorder=2,
         )
-
         # Plot threshold
         ax.plot(
             dates,
@@ -107,11 +92,9 @@ def create_main_methane_detection_plot(plot: bool = False):
             label="Anomaly Threshold (μ + 3σ)",
             zorder=2,
         )
-
         # Highlight anomalies
         anomaly_dates = [d for d, a in zip(dates, anomalies) if a]
         anomaly_values = [v for v, a in zip(methane, anomalies) if a]
-
         ax.scatter(
             anomaly_dates,
             anomaly_values,
@@ -122,10 +105,8 @@ def create_main_methane_detection_plot(plot: bool = False):
             label=f"Detected Anomalies (n={len(anomaly_dates)})",
             zorder=4,
         )
-
         # Apply minimalist style
         apply_minimalist_style_manual(ax)
-
         ax.set_xlabel("Date", fontsize=11)
         ax.set_ylabel("CH₄ Column Density (ppb)", fontsize=11)
         ax.set_title(
@@ -135,12 +116,9 @@ def create_main_methane_detection_plot(plot: bool = False):
             loc="left",
             pad=20,
         )
-
         ax.legend(loc="upper left", frameon=False, fontsize=9)
-
         # Format x-axis
         ax.tick_params(axis="x", rotation=45)
-
         # Add annotation for leak events
         ax.annotate(
             "Potential Leak Event",
@@ -150,7 +128,6 @@ def create_main_methane_detection_plot(plot: bool = False):
             fontsize=9,
             bbox={"boxstyle": "round", "facecolor": "white", "edgecolor": "black"},
         )
-
         plt.tight_layout()
         plt.savefig(
             "outputs/14_satellite_leak_detection_main.png",
@@ -168,44 +145,29 @@ def create_multi_sensor_fusion_plot(plot: bool = False):
     Create plot showing multi-sensor fusion (TROPOMI + Sentinel-2 + Sentinel-1).
     """
     logger.info("Generating multi-sensor fusion visualization...")
-
     # Generate synthetic data for a spatial grid
     np.random.seed(42)
-
     n_points = 100
     x = np.linspace(-2, 2, n_points)
     y = np.linspace(-2, 2, n_points)
     X, Y = np.meshgrid(x, y)
-
     # Simulate leak at (0.5, 0.3)
     leak_x, leak_y = 0.5, 0.3
-
     # TROPOMI methane plume (coarse resolution)
     dist_tropomi = np.sqrt((X - leak_x) ** 2 + (Y - leak_y) ** 2)
-    tropomi = (
-        np.exp(-(dist_tropomi**2) / 0.8) * 300
-        + np.random.randn(n_points, n_points) * 20
-    )
+    tropomi = np.exp(-(dist_tropomi**2) / 0.8) * 300 + np.random.randn(n_points, n_points) * 20
     tropomi = np.clip(tropomi, 0, 300)
-
     # Sentinel-2 NDVI anomaly (medium resolution)
     dist_s2 = np.sqrt((X - leak_x) ** 2 + (Y - leak_y) ** 2)
-    sentinel2 = (
-        -np.exp(-(dist_s2**2) / 0.4) * 0.3 + np.random.randn(n_points, n_points) * 0.05
-    )
+    sentinel2 = -np.exp(-(dist_s2**2) / 0.4) * 0.3 + np.random.randn(n_points, n_points) * 0.05
     sentinel2 = np.clip(sentinel2, -0.3, 0.1)
-
     # Sentinel-1 SAR coherence loss (fine resolution)
     dist_s1 = np.sqrt((X - leak_x) ** 2 + (Y - leak_y) ** 2)
-    sentinel1 = (
-        -np.exp(-(dist_s1**2) / 0.3) * 0.4 + np.random.randn(n_points, n_points) * 0.06
-    )
+    sentinel1 = -np.exp(-(dist_s1**2) / 0.3) * 0.4 + np.random.randn(n_points, n_points) * 0.06
     sentinel1 = np.clip(sentinel1, -0.4, 0.1)
-
     # Create figure with 4 subplots
     if plot:
         plt.figure(figsize=(14, 10))
-
         # TROPOMI
         ax1 = plt.subplot(2, 2, 1)
         im1 = ax1.contourf(X, Y, tropomi, levels=15, cmap="YlOrRd")
@@ -224,7 +186,6 @@ def create_multi_sensor_fusion_plot(plot: bool = False):
         cbar1 = plt.colorbar(im1, ax=ax1)
         cbar1.set_label("ΔCH₄ (ppb)", fontsize=9)
         cbar1.outline.set_visible(False)
-
         # Sentinel-2
         ax2 = plt.subplot(2, 2, 2)
         im2 = ax2.contourf(X, Y, sentinel2, levels=15, cmap="RdYlGn")
@@ -243,7 +204,6 @@ def create_multi_sensor_fusion_plot(plot: bool = False):
         cbar2 = plt.colorbar(im2, ax=ax2)
         cbar2.set_label("ΔNDVI", fontsize=9)
         cbar2.outline.set_visible(False)
-
         # Sentinel-1
         ax3 = plt.subplot(2, 2, 3)
         im3 = ax3.contourf(X, Y, sentinel1, levels=15, cmap="RdYlGn")
@@ -262,26 +222,17 @@ def create_multi_sensor_fusion_plot(plot: bool = False):
         cbar3 = plt.colorbar(im3, ax=ax3)
         cbar3.set_label("Δ Coherence", fontsize=9)
         cbar3.outline.set_visible(False)
-
         # Fused detection score
         ax4 = plt.subplot(2, 2, 4)
         # Normalize and combine
         tropomi_norm = (tropomi - tropomi.min()) / (tropomi.max() - tropomi.min())
         sentinel2_norm = np.abs(sentinel2) / np.abs(sentinel2).max()
         sentinel1_norm = np.abs(sentinel1) / np.abs(sentinel1).max()
-
-        fused_score = (
-            tropomi_norm * 0.5 + sentinel2_norm * 0.25 + sentinel1_norm * 0.25
-        ) * 100
-
+        fused_score = (tropomi_norm * 0.5 + sentinel2_norm * 0.25 + sentinel1_norm * 0.25) * 100
         im4 = ax4.contourf(X, Y, fused_score, levels=15, cmap="hot_r")
         ax4.plot(leak_x, leak_y, "k*", markersize=20, label="Pipeline Location")
-
         # Add contour for high confidence detection
-        ax4.contour(
-            X, Y, fused_score, levels=[60], colors="cyan", linewidths=3, linestyles="--"
-        )
-
+        ax4.contour(X, Y, fused_score, levels=[60], colors="cyan", linewidths=3, linestyles="--")
         apply_minimalist_style_manual(ax4)
         ax4.set_xlabel("Easting (km)", fontsize=9)
         ax4.set_ylabel("Northing (km)", fontsize=9)
@@ -296,14 +247,12 @@ def create_multi_sensor_fusion_plot(plot: bool = False):
         cbar4 = plt.colorbar(im4, ax=ax4)
         cbar4.set_label("Leak Confidence (%)", fontsize=9)
         cbar4.outline.set_visible(False)
-
         plt.suptitle(
             "Multi-Sensor Fusion for Pipeline Leak Detection",
             fontsize=14,
             fontweight="bold",
             y=0.98,
         )
-
         plt.tight_layout(rect=[0, 0, 1, 0.97])
         plt.savefig(
             "outputs/14_satellite_multi_sensor_fusion.png",
@@ -320,10 +269,8 @@ def main():
     signalplot.apply(font_family="serif")
     logger.info("Blog 14: Satellite Leak Detection - Visualizations")
     logger.info()
-
     create_main_methane_detection_plot()
     create_multi_sensor_fusion_plot()
-
     logger.info()
     logger.info("All visualizations generated successfully!")
     logger.info()
