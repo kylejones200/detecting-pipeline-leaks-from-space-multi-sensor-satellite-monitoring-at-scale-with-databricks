@@ -1,0 +1,13 @@
+[package]
+name = "detecting_pipeline_leaks_from_space_multi_sensor_satellite_monitoring_at_scale_with_databricks_bench"
+description = "Standalone Rust benchmark (no Python)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "bench"
+path = "src/main.rs"
+
+[dependencies]
+detecting_pipeline_leaks_from_space_multi_sensor_satellite_monitoring_at_scale_with_databricks_core = { path = "../core" }
