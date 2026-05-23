@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parent; sys.path.insert(0,str(ROOT/"src"))
 from compute_kernel import rolling_anomaly_flags
 def main():
     p=argparse.ArgumentParser(); p.add_argument("--n",type=int,default=5000); p.add_argument("--iterations",type=int,default=2000); a=p.parse_args()
-    m=np.sin(np.arange(a.n)*0.01)+2.0+np.random.default_rng(0).normal(0,0.05,a.n)
+    m=np.ascontiguousarray(np.sin(np.arange(a.n)*0.01)+2.0+np.random.default_rng(0).normal(0,0.05,a.n), dtype=float)
     t0=time.perf_counter()
     for _ in range(a.iterations): rolling_anomaly_flags(m)
     py_s=time.perf_counter()-t0

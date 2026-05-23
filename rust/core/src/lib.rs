@@ -4,20 +4,22 @@
 pub fn rolling_mean_same(methane: &[f64], window: usize) -> Vec<f64> {
     let n = methane.len();
     let w = window.max(1);
-    let mut conv = vec![0.0; n];
-    for i in 0..n {
+    if n == 0 {
+        return vec![];
+    }
+    let pad = (w - 1) / 2;
+    let mut full = vec![0.0; n + w - 1];
+    for k in 0..full.len() {
         let mut sum = 0.0;
-        let mut count = 0usize;
         for j in 0..w {
-            let idx = i as isize + j as isize - (w as isize / 2);
-            if idx >= 0 && (idx as usize) < n {
-                sum += methane[idx as usize];
-                count += 1;
+            let ai = k as isize - j as isize;
+            if ai >= 0 && (ai as usize) < n {
+                sum += methane[ai as usize];
             }
         }
-        conv[i] = sum / count.max(1) as f64;
+        full[k] = sum / w as f64;
     }
-    conv
+    full[pad..pad + n].to_vec()
 }
 
 pub fn rolling_std_window(methane: &[f64], window: usize) -> Vec<f64> {
