@@ -11,14 +11,7 @@ Pipeline operators spend billions on inline inspection and aerial surveys, but 9
 
 Modern satellite systems detect leaks through multiple physical signals: methane absorption in atmospheric columns (TROPOMI), vegetation stress from hydrocarbon exposure (Sentinel-2 multispectral), and ground deformation or surface changes (Sentinel-1 SAR). The challenge isn't data availability --- it's building a scalable pipeline that ingests terabytes of satellite imagery, extracts leak signatures near the right-of-way, scores tiles by anomaly, and presents prioritized inspection targets to field crews.
 
-## About
 
-Place the code for this article in this repository.
-The original article export is saved as `article.md`.
-
-## Files
-
-Add your `.ipynb`, `.py`, `.yaml`, `.js`, `.ts`, or other project files here.
 
 ## Rust performance port
 
